@@ -1,0 +1,23 @@
+{
+    "name": "app55/app55-php",
+    "description": "App55 API Client for PHP",
+    "minimum-stability": "stable",
+	"homepage": "http://docs.app55.com/api/php",
+    "authors": [
+        {
+            "name": "App55",
+            "email": "support@app55.com"
+        }
+    ],
+    "require": {
+		"php": ">=5.1"
+    },
+	"require-dev" : {
+		"EHER/PHPUnit": ">=1.6"
+	},
+	"autoload": {
+		"psr-0": {
+			"App55": "lib/"
+		}
+	}
+}
