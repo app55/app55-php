@@ -9,5 +9,4 @@ cp -R lib README.md LICENSE VERSION composer.json runtests.sh tests $BUILD_DIR/
 find $BUILD_DIR -name '.*' -exec rm -Rf {} \;
 cd build/
 tar czf ../../$FINAL_NAME.tar.gz $FINAL_NAME/
-zip ../../$FINAL_NAME.zip $FINAL_NAME/
 rm -Rf build/
