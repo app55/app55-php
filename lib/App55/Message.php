@@ -10,7 +10,12 @@ abstract class App55_Message {
 	}
 
 	public function __get($name) {
-		if($this->args instanceof StdClass)
+		if($name == 'formData') {
+			$args = $this->toArray($this->gateway->apiKey, $this->gateway->apiSecret);
+			$args = $this->toDotted($args);
+			ksort($args);
+			return App55_HttpUrlEncoder::encode($args);
+		} else if($this->args instanceof StdClass)
 			return $this->args->$name;
 		else
 			return $this->args[$name];
@@ -75,12 +80,14 @@ abstract class App55_Message {
 				$arrout = array_merge($arrout, $this->toDotted($v, $key));		
 			} else if($v instanceof StdClass) {
 				$arrout = array_merge($arrout, $this->toDotted($v, $key));
+			} else if(is_bool($v)) {
+				$arrout[$key] = $v ? 'true' : 'false';
 			} else {
 				$arrout[$key] = $v;
 			}
 		}
 		return $arrout;
-	} 
+	}
 
 	public function __toString() {
 		$s = '';

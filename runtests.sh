@@ -1,2 +1,2 @@
 #!/usr/bin/env sh
-vendor/EHER/PHPUnit/bin/phpunit tests
+vendor/eher/phpunit/bin/phpunit tests

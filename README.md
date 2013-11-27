@@ -9,4 +9,4 @@ Revision History:
 
 0.8.3 Fix incorrect Certificate in initial release 
 
-
+0.8.4 Introduced basic scheduling support and integration tests.

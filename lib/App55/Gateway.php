@@ -53,6 +53,19 @@ class App55_Gateway {
 			'user' => $user
 		));
 	}
+	
+	public function createSchedule($schedule, $user, $card, $transaction) {
+		return new App55_ScheduleCreateRequest($this, array(
+			'schedule' => $schedule,
+			'user' => $user,
+			'card' => $card,
+			'transaction' => $transaction
+		));
+	}
+	
+	public function response($qs) {
+		return new App55_Response($this, $qs);
+	}
 }
 
 ?>

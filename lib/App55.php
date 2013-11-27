@@ -16,10 +16,14 @@ require(dirname(__FILE__) . '/App55/UserCreateRequest.php');
 require(dirname(__FILE__) . '/App55/UserAuthenticateRequest.php');
 require(dirname(__FILE__) . '/App55/UserUpdateRequest.php');
 
+require(dirname(__FILE__) . '/App55/ScheduleCreateRequest.php');
+require(dirname(__FILE__) . '/App55/ScheduleListRequest.php');
+
 require(dirname(__FILE__) . '/App55/DAO.php');
 require(dirname(__FILE__) . '/App55/Card.php');
 require(dirname(__FILE__) . '/App55/Address.php');
 require(dirname(__FILE__) . '/App55/Transaction.php');
+require(dirname(__FILE__) . '/App55/Schedule.php');
 require(dirname(__FILE__) . '/App55/User.php');
 
 require(dirname(__FILE__) . '/App55/ApiException.php');
