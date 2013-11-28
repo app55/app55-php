@@ -54,6 +54,21 @@ class GatewayIntegrationTest extends PHPUnit_Framework_TestCase
 	
 	/**
      * @depends testSuccessfulGateway
+     * @depends testUserSuccessful
+     */
+	public function testGetUserSuccessful($gateway, $user_response) {
+	
+		$response = $gateway->getUser(new App55_User(array(
+			'id' => $user_response->user->id
+		)))->send();
+
+		$this->assertEquals($user_response->user->id, $response->user->id);
+		
+		return $response;
+	}
+	
+	/**
+     * @depends testSuccessfulGateway
      * @expectedException App55_ValidationException
      */
 	public function testUserPasswordNoMatch($gateway) {
@@ -376,6 +391,32 @@ class GatewayIntegrationTest extends PHPUnit_Framework_TestCase
 				'amount' => '0.10',
 				'currency' => 'GBP'
 			))
+		)->send();
+		
+		$this->assertNotEmpty($response->transaction->id);
+		
+		return $response;
+    }
+    
+    /**
+     * @depends testSuccessfulGateway
+     * @depends testUserSuccessful
+     * @depends testCreateCardSuccessful
+     */
+    public function testCreateTransactionIPSuccessful($gateway, $user_response, $card) {
+	    
+	    $response = $gateway->createTransaction(
+			new App55_User(array(
+				'id' => $user_response->user->id
+			)),
+			new App55_Card(array(
+				'token' => $card->card->token
+			)),
+			new App55_Transaction(array(
+				'amount' => '0.20',
+				'currency' => 'GBP'
+			)),
+			'2.125.59.253'
 		)->send();
 		
 		$this->assertNotEmpty($response->transaction->id);
@@ -1275,6 +1316,106 @@ class GatewayIntegrationTest extends PHPUnit_Framework_TestCase
 				'currency' => $transaction->transaction->currency
 			))
 		)->send();
+
+		return $response;
+    }
+    
+    /**
+     * @depends testSuccessfulGateway
+     * @depends testUserSuccessful
+     * @depends testCreateCardSuccessful
+     * @depends testCreateTransactionSuccessful
+     * @depends testCreateScheduleMonthlySuccessful
+     */
+    public function testGetScheduleSuccessful($gateway, $user_response, $card, $transaction, $schedule) {
+    	$response = $gateway->getSchedule(
+			new App55_Schedule(array(
+				'id' => $schedule->schedule->id
+			)),
+			new App55_User(array(
+				'id' => $user_response->user->id
+			))
+		)->send();
+
+		$this->assertEquals($schedule->schedule->id, $response->schedule->id);
+		$this->assertEquals($schedule->schedule->end, $response->schedule->end);
+
+		return $response;
+    }
+    
+    /**
+     * @depends testSuccessfulGateway
+     * @depends testUserSuccessful
+     * @depends testCreateCardSuccessful
+     * @depends testCreateTransactionSuccessful
+     * @depends testGetScheduleSuccessful
+     */
+    public function testUpdateScheduleSuccessful($gateway, $user_response, $card, $transaction, $schedule) {
+    	$prevEndDate = $schedule->schedule->end;
+    	$newEndDate = date("Y-m",strtotime("+3 month"))."-01";
+
+    	$response = $gateway->updateSchedule(
+			new App55_Schedule(array(
+				'id' => $schedule->schedule->id,
+				'end' => $newEndDate
+			)),
+			new App55_User(array(
+				'id' => $user_response->user->id
+			)),
+			new App55_Card(array(
+				'token' => $card->card->token
+			))
+		)->send();
+
+		$this->assertNotNull($response);
+
+		return $response;
+    }
+    
+    /**
+     * @depends testSuccessfulGateway
+     * @depends testUserSuccessful
+     * @depends testCreateCardSuccessful
+     * @depends testCreateTransactionSuccessful
+     * @depends testUpdateScheduleSuccessful
+     */
+    public function testListScheduleSuccessful($gateway, $user_response, $card, $transaction, $schedule) {
+
+    	$response = $gateway->listSchedule(
+			new App55_User(array(
+				'id' => $user_response->user->id
+			)),
+			FALSE
+		)->send();
+
+		$this->assertEquals(6, sizeof($response->schedules));
+
+		return $response;
+    }
+    
+    /**
+     * @depends testSuccessfulGateway
+     * @depends testUserSuccessful
+     * @depends testCreateCardSuccessful
+     * @depends testCreateTransactionSuccessful
+     * @depends testGetScheduleSuccessful
+     */
+    public function testDeleteScheduleSuccessful($gateway, $user_response, $card, $transaction, $schedule) {
+    	$prevEndDate = $schedule->schedule->end;
+    	$newEndDate = date("Y-m",strtotime("+3 month"))."-01";
+
+    	$response = $gateway->deleteSchedule(
+			new App55_Schedule(array(
+				'id' => $schedule->schedule->id
+			)),
+			new App55_User(array(
+				'id' => $user_response->user->id
+			))
+		)->send();
+
+		$this->assertNotNull($response);
+
+		return $response;
     }
 }
 ?>
