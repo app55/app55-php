@@ -112,6 +112,22 @@ function commitTransaction($transaction) {
 	return $response;
 }
 
+function cancelTransaction($user, $transaction) {
+	global $gateway;
+	
+	echo "Cancelling transaction...";
+	$response = $gateway->cancelTransaction(
+		new App55_User(array(
+			'id' => $user->id
+		)),
+		new App55_Transaction(array(
+			'id' => $transaction->id
+		))
+	)->send();
+	echo " DONE\n";
+	return $response;
+}
+
 echo "App55 Sandbox - API Key <$gateway->apiKey>\n";
 echo "\n";
 
@@ -123,7 +139,7 @@ commitTransaction($transaction);
 
 $card2 = createCard($user)->card;
 $transaction = createTransaction($user, $card2)->transaction;
-commitTransaction($transaction);
+cancelTransaction($user, $transaction);
 
 $card3 = createCard($user)->card;
 $transaction = createTransaction($user, $card3)->transaction;

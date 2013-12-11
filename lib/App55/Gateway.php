@@ -51,6 +51,13 @@ class App55_Gateway {
 		));
 	}
 
+	public function cancelTransaction($user, $transaction) {
+		return new App55_TransactionCancelRequest($this, array(
+			'user' => $user,
+			'transaction' => $transaction
+		));
+	}
+
 	public function createUser($user) {
 		return new App55_UserCreateRequest($this, array(
 			'user' => $user
