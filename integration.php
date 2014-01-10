@@ -1,7 +1,7 @@
 <?php
 
 require_once(dirname(__FILE__) . '/lib/App55.php');
-$gateway = new App55_Gateway(App55_Environment::$sandbox, getenv('APP55_API_KEY'), getenv('APP55_API_SECRET'));
+$gateway = new App55_Gateway(App55_Environment::$development, getenv('APP55_API_KEY') ? getenv('APP55_API_KEY') : 'cHvG680shFTaPWhp8RHhGCSo5QbHkWxP', getenv('APP55_API_SECRET') ? getenv('APP55_API_SECRET') : 'zMHzGPF3QAAQQzTDoTGtGz8f5WFZFjzM');
 
 function createUser() {
 	global $gateway;
@@ -23,7 +23,7 @@ function createUser() {
 	return $response;
 }
 
-function createCard($user) {
+function createCard($user, $number = '4111111111111111') {
 	global $gateway;
 
 	echo "Creating card...";
@@ -33,7 +33,7 @@ function createCard($user) {
 		)),
 		new App55_Card(array(
 			'holder_name' => 'App55 User',
-			'number' => '4111111111111111',
+			'number' => $number,
 			'expiry' => gmdate('m/Y', time() + 90 * 24 * 3600),
 			'security_code' => '111',
 			'address' => new App55_Address(array(
@@ -77,7 +77,7 @@ function deleteCard($user, $card) {
 	return $response;
 }
 
-function createTransaction($user, $card) {
+function createTransaction($user, $card, $commit=false, $threeds=false) {
 	global $gateway;
 
 	echo "Creating transaction...";
@@ -90,8 +90,10 @@ function createTransaction($user, $card) {
 		)),
 		new App55_Transaction(array(
 			'amount' => '0.10',
-			'currency' => 'GBP'
-		))
+			'currency' => 'GBP',
+			'commit' => $commit
+		)),
+		$threeds
 	)->send();
 	echo " DONE (transaction-id " . $response->transaction->id . ")\n";
 	return $response;
@@ -108,6 +110,17 @@ function commitTransaction($transaction) {
 	)->send();
 	echo " DONE\n";
 	return $response;
+}
+
+function file_get_contents_json($url) {
+	$context = stream_context_create(array(
+		'http' => array(
+			'method' => 'GET',
+			'ignore_errors' => false,
+			'header' => 'Accept: application/json'
+		)
+	));
+	return file_get_contents($url, false, $context);
 }
 
 echo "App55 Sandbox - API Key <$gateway->apiKey>\n";
@@ -127,6 +140,33 @@ $card3 = createCard($user)->card;
 $transaction = createTransaction($user, $card3)->transaction;
 commitTransaction($transaction);
 
+$card_3ds_ne = createCard($user, '4543130000001116')->card;
+
+$transaction = createTransaction($user, $card1, false, true);
+$response = file_get_contents_json($transaction->threeds . '&next=http://dev.app55.com/v1/echo');
+$response = $gateway->response(null, $response);
+$transaction = $gateway->commitTransaction($response->transaction)->send()->transaction;
+assert($transaction->code == 'succeeded');
+assert($transaction->auth_code == '06603');
+
+$transaction = createTransaction($user, $card1, true, true);
+$response = file_get_contents_json($transaction->threeds . '&next=http://dev.app55.com/v1/echo');
+$response = $gateway->response(null, $response);
+assert($response->transaction->code == 'succeeded');
+assert($response->transaction->auth_code == '06603');
+
+$transaction = createTransaction($user, $card_3ds_ne, false, true);
+assert(!isset($transaction->threeds));
+$transaction = $gateway->commitTransaction($transaction->transaction)->send()->transaction;
+assert($transaction->code == 'succeeded');
+assert($transaction->auth_code == '06603');
+
+$transaction = createTransaction($user, $card_3ds_ne, true, true);
+assert(!isset($transaction->threeds));
+assert($transaction->transaction->code == 'succeeded');
+assert($transaction->transaction->auth_code == '06603');
+
+
 $cards = listCards($user)->cards;
 $tokens = array();
 foreach($cards as $card) {
@@ -135,11 +175,13 @@ foreach($cards as $card) {
 assert(in_array($card1->token, $tokens));
 assert(in_array($card2->token, $tokens));
 assert(in_array($card3->token, $tokens));
-assert(count($cards) == 3);
+assert(in_array($card_3ds_ne->token, $tokens));
+assert(count($cards) == 4);
 
 deleteCard($user, $card1);
 deleteCard($user, $card2);
 deleteCard($user, $card3);
+deleteCard($user, $card_3ds_ne);
 
 assert(count(listCards($user)->cards) == 0);
 

@@ -25,11 +25,12 @@ class App55_Gateway {
 		));
 	}
 
-	public function createTransaction($user, $card, $transaction) {
+	public function createTransaction($user, $card, $transaction, $threeds = false) {
 		return new App55_TransactionCreateRequest($this, array(
 			'user' => $user,
 			'card' => $card,
-			'transaction' => $transaction
+			'transaction' => $transaction,
+			'threeds' => $threeds
 		));
 	}
 	public function commitTransaction($transaction) {
@@ -52,6 +53,10 @@ class App55_Gateway {
 		return new App55_UserUpdateRequest($this, array(
 			'user' => $user
 		));
+	}
+
+	public function response($qs = null, $json = null) {
+		return new App55_Response($this, $qs, $json);
 	}
 }
 
