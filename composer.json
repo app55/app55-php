@@ -1,5 +1,6 @@
 {
     "name": "app55/app55-php",
+    "type": "library",
     "description": "App55 API Client for PHP",
     "minimum-stability": "stable",
 	"homepage": "http://docs.app55.com/api/php",

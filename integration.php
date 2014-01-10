@@ -1,7 +1,9 @@
 <?php
 
+require_once('tests/TestConfiguration.php');
 require_once(dirname(__FILE__) . '/lib/App55.php');
-$gateway = new App55_Gateway(App55_Environment::$development, getenv('APP55_API_KEY') ? getenv('APP55_API_KEY') : 'cHvG680shFTaPWhp8RHhGCSo5QbHkWxP', getenv('APP55_API_SECRET') ? getenv('APP55_API_SECRET') : 'zMHzGPF3QAAQQzTDoTGtGz8f5WFZFjzM');
+
+$gateway = new App55_Gateway(App55_Environment::$sandbox, TestConfiguration::getApiKey(), TestConfiguration::getApiSecret());
 
 function createUser() {
 	global $gateway;
@@ -123,6 +125,22 @@ function file_get_contents_json($url) {
 	return file_get_contents($url, false, $context);
 }
 
+function cancelTransaction($user, $transaction) {
+	global $gateway;
+	
+	echo "Cancelling transaction...";
+	$response = $gateway->cancelTransaction(
+		new App55_User(array(
+			'id' => $user->id
+		)),
+		new App55_Transaction(array(
+			'id' => $transaction->id
+		))
+	)->send();
+	echo " DONE\n";
+	return $response;
+}
+
 echo "App55 Sandbox - API Key <$gateway->apiKey>\n";
 echo "\n";
 
@@ -134,7 +152,7 @@ commitTransaction($transaction);
 
 $card2 = createCard($user)->card;
 $transaction = createTransaction($user, $card2)->transaction;
-commitTransaction($transaction);
+cancelTransaction($user, $transaction);
 
 $card3 = createCard($user)->card;
 $transaction = createTransaction($user, $card3)->transaction;
