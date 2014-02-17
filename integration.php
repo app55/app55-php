@@ -161,14 +161,14 @@ commitTransaction($transaction);
 $card_3ds_ne = createCard($user, '4543130000001116')->card;
 
 $transaction = createTransaction($user, $card1, false, true);
-$response = file_get_contents_json($transaction->threeds . '&next=http://dev.app55.com/v1/echo');
+$response = file_get_contents_json($transaction->threeds . "&next={$gateway->environment->baseUrl}/echo");
 $response = $gateway->response(null, $response);
 $transaction = $gateway->commitTransaction($response->transaction)->send()->transaction;
 assert($transaction->code == 'succeeded');
 assert($transaction->auth_code == '06603');
 
 $transaction = createTransaction($user, $card1, true, true);
-$response = file_get_contents_json($transaction->threeds . '&next=http://dev.app55.com/v1/echo');
+$response = file_get_contents_json($transaction->threeds . "&next={$gateway->environment->baseUrl}/echo");
 $response = $gateway->response(null, $response);
 assert($response->transaction->code == 'succeeded');
 assert($response->transaction->auth_code == '06603');
